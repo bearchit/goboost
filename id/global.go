@@ -1,14 +1,13 @@
-package global
+package id
 
 import (
 	"github.com/bearchit/goboost/coder"
-	"github.com/bearchit/goboost/id"
 )
 
-func NewGenerator(
+func NewGlobalGenerator(
 	namespace string,
-) id.Generator {
-	return id.NewGenerator(
+) Generator {
+	return NewGenerator(
 		coder.ChainEncoder(
 			coder.NewUuidV4Encoder(),
 			coder.NewPrefixEncoder([]byte(namespace)),
@@ -17,8 +16,8 @@ func NewGenerator(
 	)
 }
 
-func NewParser() id.Parser {
-	return id.NewParser(
+func NewGlobalParser() Parser {
+	return NewParser(
 		coder.ChainDecoder(
 			coder.NewBase64URLDecoder(),
 			coder.NewPrefixDecoder(),
@@ -26,7 +25,7 @@ func NewParser() id.Parser {
 	)
 }
 
-func Namespace(payload coder.Payload) string {
+func GlobalNamespace(payload coder.Payload) string {
 	p, err := payload.Get(coder.PayloadPrefix)
 	if err != nil {
 		panic(err)

@@ -1,27 +1,27 @@
-package global_test
+package id_test
 
 import (
 	"testing"
+
+	"github.com/bearchit/goboost/id"
 
 	uuid "github.com/satori/go.uuid"
 	"github.com/stretchr/testify/assert"
 
 	"github.com/stretchr/testify/require"
-
-	"github.com/bearchit/goboost/id/codec/global"
 )
 
 func TestNewEncoder(t *testing.T) {
-	generator := global.NewGenerator("order")
+	generator := id.NewGlobalGenerator("order")
 	generated, err := generator.Generate()
 	require.NoError(t, err)
 
-	parser := global.NewParser()
+	parser := id.NewGlobalParser()
 	parsed, payload, err := parser.Parse(generated)
 	require.NoError(t, err)
 
 	parsedUUID, err := uuid.FromString(string(parsed))
 	require.NoError(t, err)
 	assert.Equal(t, uuid.V4, parsedUUID.Version())
-	assert.Equal(t, "order", global.Namespace(payload))
+	assert.Equal(t, "order", id.GlobalNamespace(payload))
 }
