@@ -8,6 +8,6 @@ import (
 )
 
 func TestNewIDs(t *testing.T) {
-	ids := id.NewIDs("1", "2")
-	assert.Equal(t, id.IDs{"1", "2"}, ids)
+	ids := id.NewIDs(id.ID("1"), id.ID("2"))
+	assert.Equal(t, id.IDs{id.ID("1"), id.ID("2")}, ids)
 }
