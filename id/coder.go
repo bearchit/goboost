@@ -75,3 +75,9 @@ func (decoder parser) MustParse(id ID) (ID, coder.Payload) {
 	must(err)
 	return decoded, payload
 }
+
+func NewStubGenerator(mockedID ID) Generator {
+	return NewGenerator(coder.EncoderFunc(func(src []byte) ([]byte, error) {
+		return []byte(mockedID), nil
+	}))
+}
