@@ -16,6 +16,10 @@ func FromString(id string) ID {
 	return ID(id)
 }
 
+func FromBytes(b []byte) ID {
+	return FromString(string(b))
+}
+
 type IDs []ID
 
 func NewIDs(

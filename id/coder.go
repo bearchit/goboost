@@ -1,136 +1,77 @@
 package id
 
-import (
-	"fmt"
-)
+import "github.com/bearchit/goboost/coder"
 
-type Encoder interface {
-	Encode(src ID) (ID, error)
-}
-
-type EncoderFunc func(ID) (ID, error)
-
-func (f EncoderFunc) Encode(src ID) (ID, error) {
-	return f(src)
-}
-
-type Payload map[string]interface{}
-
-func (p Payload) IsZero() bool {
-	return len(p) == 0
-}
-
-type Decoder interface {
-	Decode(src ID) (ID, Payload, error)
-}
-
-type DecoderFunc func(ID) (ID, Payload, error)
-
-func (f DecoderFunc) Decode(src ID) (ID, Payload, error) {
-	return f(src)
-}
-
-type Codec interface {
-	Encoder
-	Decoder
-}
-
-type Coder interface {
-	Encode() (ID, error)
-	MustEncode() ID
-
-	EncodeWith(initialID ID) (ID, error)
-	MustEncodeWith(initialID ID) ID
-
-	Decode(id ID) (ID, Payload, error)
-	MustDecode(id ID) (ID, Payload)
-}
-
-type coder struct {
-	initialID ID
-	codecs    []Codec
-}
-
-func NewCoder(
-	codecs ...Codec,
-) Coder {
-	return &coder{
-		codecs: codecs,
-	}
-}
-
-func (e coder) Encode() (ID, error) {
-	var (
-		id  ID
-		err error
-	)
-
-	for _, codec := range e.codecs {
-		id, err = codec.Encode(id)
-		if err != nil {
-			return NilID, err
-		}
-	}
-
-	return id, nil
-}
-
-func (e coder) MustEncode() ID {
-	id, err := e.Encode()
+func must(err error) {
 	if err != nil {
 		panic(err)
 	}
-	return id
 }
 
-func (e coder) EncodeWith(initialID ID) (ID, error) {
-	var err error
+type Generator interface {
+	Generate() (ID, error)
+	MustGenerate() ID
 
-	for _, codec := range e.codecs {
-		initialID, err = codec.Encode(initialID)
-		if err != nil {
-			return NilID, err
-		}
-	}
-	return initialID, nil
+	GenerateWith(initialID ID) (ID, error)
+	MustGenerateWith(initialID ID) ID
 }
 
-func (e coder) MustEncodeWith(initialID ID) ID {
-	id, err := e.EncodeWith(initialID)
+type generator struct {
+	coder.Encoder
+}
+
+func NewGenerator(enc coder.Encoder) Generator {
+	return &generator{Encoder: enc}
+}
+
+func (encoder generator) Generate() (ID, error) {
+	return encoder.GenerateWith("")
+}
+
+func (encoder generator) GenerateWith(initialID ID) (ID, error) {
+	encoded, err := encoder.Encoder.Encode([]byte(initialID))
 	if err != nil {
-		panic(err)
+		return NilID, err
 	}
-	return id
+	return FromBytes(encoded), nil
 }
 
-func (e coder) Decode(id ID) (ID, Payload, error) {
-	var (
-		err           error
-		entirePayload = make(Payload)
-	)
-
-	for i := len(e.codecs) - 1; i >= 0; i-- {
-		var payload Payload
-		id, payload, err = e.codecs[i].Decode(id)
-		if err != nil {
-			return NilID, nil, err
-		}
-
-		for k, v := range payload {
-			if _, ok := entirePayload[k]; ok {
-				return NilID, nil, fmt.Errorf("%s already exists", k)
-			}
-			entirePayload[k] = v
-		}
-	}
-
-	return id, entirePayload, nil
+func (encoder generator) MustGenerate() ID {
+	encoded, err := encoder.Generate()
+	must(err)
+	return encoded
 }
 
-func (e coder) MustDecode(id ID) (ID, Payload) {
-	decoded, payload, err := e.Decode(id)
+func (encoder generator) MustGenerateWith(initialID ID) ID {
+	encoded, err := encoder.GenerateWith(initialID)
+	must(err)
+	return encoded
+}
+
+type Parser interface {
+	Parse(id ID) (ID, coder.Payload, error)
+	MustParse(id ID) (ID, coder.Payload)
+}
+
+type parser struct {
+	coder.Decoder
+}
+
+func NewParser(dec coder.Decoder) Parser {
+	return &parser{Decoder: dec}
+}
+
+func (decoder parser) Parse(id ID) (ID, coder.Payload, error) {
+	decoded, payload, err := decoder.Decoder.Decode([]byte(id))
 	if err != nil {
-		panic(err)
+		return NilID, nil, err
 	}
+
+	return FromBytes(decoded), payload, nil
+}
+
+func (decoder parser) MustParse(id ID) (ID, coder.Payload) {
+	decoded, payload, err := decoder.Parse(id)
+	must(err)
 	return decoded, payload
 }
