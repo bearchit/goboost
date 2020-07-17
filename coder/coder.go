@@ -32,6 +32,10 @@ var (
 	ErrPayloadNotFound = errors.New("payload not found")
 )
 
+func NewPayload() Payload {
+	return make(Payload)
+}
+
 func (p Payload) Set(key string, value interface{}) error {
 	if _, ok := p[key]; ok {
 		return fmt.Errorf("%s, %w", key, ErrPayloadExists)
@@ -75,7 +79,7 @@ func composeDecoderFunc(a, b DecoderFunc) DecoderFunc {
 	return func(src []byte) ([]byte, Payload, error) {
 		var (
 			err     error
-			payload = make(Payload)
+			payload = NewPayload()
 		)
 
 		ra, pa, err := a(src)

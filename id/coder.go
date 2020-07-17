@@ -25,7 +25,7 @@ func NewGenerator(enc coder.Encoder) Generator {
 }
 
 func (encoder generator) Generate() (ID, error) {
-	return encoder.GenerateWith("")
+	return encoder.GenerateWith(NilID)
 }
 
 func (encoder generator) GenerateWith(initialID ID) (ID, error) {

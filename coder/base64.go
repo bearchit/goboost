@@ -15,9 +15,10 @@ func NewBase64URLEncoder() EncoderFunc {
 func NewBase64URLDecoder() DecoderFunc {
 	return func(src []byte) ([]byte, Payload, error) {
 		decoded := make([]byte, base64.URLEncoding.DecodedLen(len(src)))
-		if _, err := base64.URLEncoding.Decode(decoded, src); err != nil {
+		n, err := base64.URLEncoding.Decode(decoded, src)
+		if err != nil {
 			return nil, nil, err
 		}
-		return decoded, nil, nil
+		return decoded[:n], nil, nil
 	}
 }

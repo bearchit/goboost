@@ -11,7 +11,7 @@ func NewGenerator(
 	return id.NewGenerator(
 		coder.ChainEncoder(
 			coder.NewUuidV4Encoder(),
-			coder.NewPrefixEncoder(namespace),
+			coder.NewPrefixEncoder([]byte(namespace)),
 			coder.NewBase64URLEncoder(),
 		),
 	)
