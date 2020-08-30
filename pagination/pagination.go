@@ -13,6 +13,15 @@ type CursorPageParam struct {
 	After  *string
 }
 
+func NewCursorPageParam(first, last *int, before, after *string) CursorPageParam {
+	return CursorPageParam{
+		First:  first,
+		Last:   last,
+		Before: before,
+		After:  after,
+	}
+}
+
 type CursorPageInfo struct {
 	StartCursor     string
 	EndCursor       string
