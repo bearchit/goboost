@@ -3,6 +3,8 @@ package gorm
 import (
 	"context"
 
+	"github.com/iancoleman/strcase"
+
 	"github.com/bearchit/goboost/crud"
 	"github.com/bearchit/goboost/structs"
 
@@ -40,6 +42,7 @@ func (r Repository) FindByPK(ctx context.Context, pk interface{}, result interfa
 		return err
 	}
 
+	pkField.Name = strcase.ToSnake(pkField.Name)
 	cond := make(map[string]interface{})
 	cond[pkField.Name] = pkField.Value
 	return r.db.Where(cond).First(result).Error
