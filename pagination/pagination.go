@@ -38,25 +38,29 @@ func (p OffsetPageParam) Offset() int64 {
 	return int64((p.Page - 1) * p.PerPage)
 }
 
-func NewOffsetPageParam(page, perPage *int, option ...OffsetPageParamOptionFunc) OffsetPageParam {
-	param := OffsetPageParam{
-		Page:    nullable.PtrToInt(page),
-		PerPage: nullable.PtrToInt(perPage),
+func NewOffsetPageParam(page, perPage int) OffsetPageParam {
+	return OffsetPageParam{
+		Page:    page,
+		PerPage: perPage,
 	}
-
-	for _, x := range option {
-		x(&param)
-	}
-
-	return param
 }
 
-type OffsetPageParamOptionFunc func(*OffsetPageParam)
+type OffsetPageParamFactory struct {
+	page    int
+	perPage int
+}
 
-func WithDefaultOffsetPageParam(page, perPage int) OffsetPageParamOptionFunc {
-	return func(param *OffsetPageParam) {
-		param.Page = page
-		param.PerPage = perPage
+func NewOffsetPageParamFactory(page, perPage int) OffsetPageParamFactory {
+	return OffsetPageParamFactory{
+		page:    page,
+		perPage: perPage,
+	}
+}
+
+func (f OffsetPageParamFactory) Param(page, perPage *int) OffsetPageParam {
+	return OffsetPageParam{
+		Page:    nullable.DefaultIfNilInt(page, f.page),
+		PerPage: nullable.DefaultIfNilInt(perPage, f.perPage),
 	}
 }
 

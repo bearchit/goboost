@@ -14,3 +14,10 @@ func PtrToInt(v *int) int {
 func IntToPtr(v int) *int {
 	return &v
 }
+
+func DefaultIfNilInt(v *int, dv int) int {
+	if v != nil && *v > 0 {
+		return *v
+	}
+	return dv
+}
