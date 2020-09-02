@@ -38,6 +38,10 @@ func (p OffsetPageParam) Offset() int64 {
 	return int64((p.Page - 1) * p.PerPage)
 }
 
+func (p OffsetPageParam) PageInfo(totalItems int) OffsetPageInfo {
+	return NewOffsetPageInfoFrom(p.Page, p.PerPage, totalItems)
+}
+
 func NewOffsetPageParam(page, perPage int) OffsetPageParam {
 	return OffsetPageParam{
 		Page:    page,
