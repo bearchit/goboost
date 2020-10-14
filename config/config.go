@@ -3,13 +3,14 @@ package config
 //go:generate go run github.com/golang/mock/mockgen -source=config.go -package=mocks -destination=./mocks/config.go
 
 import (
+	"fmt"
 	"io/ioutil"
 
-	"gopkg.in/yaml.v3"
-
-	"github.com/mitchellh/mapstructure"
-
+	"github.com/creasty/defaults"
+	"github.com/go-playground/validator"
 	"github.com/kelseyhightower/envconfig"
+	"github.com/mitchellh/mapstructure"
+	"gopkg.in/yaml.v3"
 )
 
 type Engine struct {
@@ -103,4 +104,28 @@ func NewEnvScanner(
 		prefix:       prefix,
 		breakOnError: breakOnError,
 	}
+}
+
+func NewDefaultEnvDrivenScanners(envPrefix string, yml string) []Scanner {
+	return []Scanner{
+		NewYMLScanner(yml, false),
+		NewEnvScanner(envPrefix, true),
+	}
+}
+
+func Load(v interface{}, scanners ...Scanner) error {
+	if err := defaults.Set(v); err != nil {
+		return fmt.Errorf("failed to set default values: %w", err)
+	}
+
+	c := New(WithScanners(scanners...))
+	if err := c.Unmarshal(v); err != nil {
+		return fmt.Errorf("failed to parse configurations: %w", err)
+	}
+
+	if err := validator.New().Struct(v); err != nil {
+		return fmt.Errorf("validation error: %w", err)
+	}
+
+	return nil
 }
