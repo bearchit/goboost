@@ -3,6 +3,7 @@ package config
 //go:generate go run github.com/golang/mock/mockgen -source=config.go -package=mocks -destination=./mocks/config.go
 
 import (
+	"encoding/json"
 	"fmt"
 	"io/ioutil"
 
@@ -128,4 +129,9 @@ func Load(v interface{}, scanners ...Scanner) error {
 	}
 
 	return nil
+}
+
+func JSON(v interface{}) string {
+	j, _ := json.MarshalIndent(v, "", "  ")
+	return string(j)
 }
